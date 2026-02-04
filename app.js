@@ -15,7 +15,9 @@ const quickAddForm = document.getElementById("quickAddForm");
 const quickTitle = document.getElementById("quickTitle");
 const quickDate = document.getElementById("quickDate");
 const quickClass = document.getElementById("quickClass");
+const searchInput = document.getElementById("taskSearch");
 const filterClass = document.getElementById("filterClass");
+const upcomingOnly = document.getElementById("upcomingOnly");
 const hideCompleted = document.getElementById("hideCompleted");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
@@ -30,6 +32,8 @@ const deleteTask = document.getElementById("deleteTask");
 const totalTasksEl = document.getElementById("totalTasks");
 const completedTasksEl = document.getElementById("completedTasks");
 const todayTasksEl = document.getElementById("todayTasks");
+const progressFill = document.getElementById("progressFill");
+const progressLabel = document.getElementById("progressLabel");
 const upcomingList = document.getElementById("upcomingList");
 const cloudForm = document.getElementById("cloudForm");
 const cloudEndpointInput = document.getElementById("cloudEndpoint");
@@ -137,6 +141,28 @@ const syncWithCloud = async (showStatus = true) => {
 
 const formatDateKey = (date) => date.toISOString().slice(0, 10);
 
+const isWithinNextDays = (dateKey, days) => {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const end = new Date(start);
+  end.setDate(end.getDate() + days);
+  const target = new Date(dateKey);
+  return target >= start && target <= end;
+};
+
+const matchesQuery = (task, query) => {
+  if (!query) return true;
+  const classInfo = data.classes.find((entry) => entry.id === task.classId);
+  const haystack = [
+    task.title,
+    task.notes,
+    classInfo ? classInfo.name : "",
+  ]
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(query.toLowerCase());
+};
+
 const getMonthDetails = (date) => {
   const year = date.getFullYear();
   const month = date.getMonth();
@@ -218,6 +244,7 @@ const renderCalendar = () => {
       const pill = document.createElement("div");
       pill.className = "task-pill";
       if (task.done) pill.classList.add("done");
+      if (!task.done && dateKey < todayKey) pill.classList.add("overdue");
       const classInfo = data.classes.find((item) => item.id === task.classId);
       pill.style.background = classInfo ? `${classInfo.color}22` : "var(--accent)";
       pill.innerHTML = `<span>${task.title}</span>`;
@@ -241,13 +268,18 @@ const renderOverview = () => {
   const totalTasks = data.tasks.length;
   const completedTasks = data.tasks.filter((task) => task.done).length;
   const todayTasks = data.tasks.filter((task) => task.date === todayKey).length;
+  const completionRate = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
   totalTasksEl.textContent = totalTasks;
   completedTasksEl.textContent = completedTasks;
   todayTasksEl.textContent = todayTasks;
+  progressFill.style.width = `${completionRate}%`;
+  progressLabel.textContent = `${completionRate}% complete`;
 
+  const query = searchInput.value.trim();
   const upcoming = data.tasks
     .filter((task) => !task.done)
+    .filter((task) => matchesQuery(task, query))
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 5);
 
@@ -273,10 +305,13 @@ const renderOverview = () => {
 const filterTasksByDate = (dateKey) => {
   const selectedClass = filterClass.value;
   const hideDone = hideCompleted.checked;
+  const query = searchInput.value.trim();
   return data.tasks
     .filter((task) => task.date === dateKey)
+    .filter((task) => matchesQuery(task, query))
     .filter((task) => selectedClass === "all" || task.classId === selectedClass)
     .filter((task) => !hideDone || !task.done)
+    .filter((task) => !upcomingOnly.checked || isWithinNextDays(task.date, 7))
     .sort((a, b) => a.title.localeCompare(b.title));
 };
 
@@ -402,8 +437,16 @@ quickAddForm.addEventListener("submit", (event) => {
   renderAll();
 });
 
-filterClass.addEventListener("change", renderCalendar);
-hideCompleted.addEventListener("change", renderCalendar);
+const rerenderAll = () => {
+  renderOverview();
+  renderCalendar();
+  if (selectedDate) renderModalTasks();
+};
+
+filterClass.addEventListener("change", rerenderAll);
+hideCompleted.addEventListener("change", rerenderAll);
+upcomingOnly.addEventListener("change", rerenderAll);
+searchInput.addEventListener("input", rerenderAll);
 
 prevMonth.addEventListener("click", () => {
   currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);

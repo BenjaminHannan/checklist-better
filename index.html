@@ -35,6 +35,10 @@
               <strong id="todayTasks">0</strong>
             </div>
           </div>
+          <div class="progress-track" aria-label="Completion progress">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+          <p id="progressLabel" class="progress-label">0% complete</p>
           <div class="overview-footer">
             <span>Next up</span>
           </div>
@@ -65,7 +69,12 @@
 
         <section class="panel">
           <h2>Filters</h2>
+          <input id="taskSearch" type="search" placeholder="Search tasks or notes" />
           <select id="filterClass"></select>
+          <label class="checkbox">
+            <input id="upcomingOnly" type="checkbox" />
+            Show next 7 days only
+          </label>
           <label class="checkbox">
             <input id="hideCompleted" type="checkbox" />
             Hide completed
