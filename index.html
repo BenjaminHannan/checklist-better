@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checklist Better</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app__header">
+        <div>
+          <p class="eyebrow">Checklist Better</p>
+          <h1>Plan your classes like a calendar, finish tasks like a checklist.</h1>
+          <p class="subhead">
+            Works offline, saves to this browser, and you can export/import to access from home or school for free.
+          </p>
+        </div>
+        <div class="header__actions">
+          <button id="exportData" class="button button--ghost">Export</button>
+          <label class="button button--ghost" for="importData">Import</label>
+          <input id="importData" type="file" accept="application/json" hidden />
+        </div>
+      </header>
+
+      <main class="app__main">
+        <section class="panel panel--classes">
+          <div class="panel__header">
+            <h2>Classes</h2>
+            <p>Color-code classes and filter the calendar.</p>
+          </div>
+          <form id="classForm" class="stack">
+            <input id="className" type="text" placeholder="Add class name" required />
+            <div class="row">
+              <input id="classColor" type="color" value="#4f46e5" />
+              <button class="button" type="submit">Add class</button>
+            </div>
+          </form>
+          <div class="class-filter">
+            <label for="classFilter">Filter calendar</label>
+            <select id="classFilter"></select>
+          </div>
+          <ul id="classList" class="class-list"></ul>
+          <div class="panel__hint">
+            <p>Cool idea: export your data and drop it in Google Drive to sync between devices.</p>
+          </div>
+        </section>
+
+        <section class="panel panel--calendar">
+          <div class="calendar__header">
+            <button id="prevMonth" class="icon-button" aria-label="Previous month">◀</button>
+            <div>
+              <h2 id="monthLabel">Month</h2>
+              <p id="monthStats" class="muted"></p>
+            </div>
+            <button id="nextMonth" class="icon-button" aria-label="Next month">▶</button>
+          </div>
+          <div class="calendar__grid" id="calendarGrid"></div>
+        </section>
+
+        <section class="panel panel--details">
+          <div class="panel__header">
+            <h2 id="selectedDateLabel">Selected day</h2>
+            <p id="selectedDateStats">No tasks yet.</p>
+          </div>
+          <form id="itemForm" class="stack">
+            <input id="itemTitle" type="text" placeholder="Checklist item" required />
+            <div class="row">
+              <input id="itemTime" type="time" />
+              <select id="itemClass"></select>
+            </div>
+            <textarea id="itemNotes" placeholder="Notes (optional)"></textarea>
+            <button class="button" type="submit">Add item</button>
+          </form>
+          <ul id="itemList" class="item-list"></ul>
+          <div class="panel__hint">
+            <h3>Extra ideas</h3>
+            <ul>
+              <li>Use the focus marker to highlight one priority per day.</li>
+              <li>Track streaks: complete all tasks 3 days in a row.</li>
+              <li>Duplicate a task to multiple days using the copy button.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="panel panel--agenda">
+          <div class="panel__header">
+            <h2>Upcoming agenda</h2>
+            <p class="muted">Next 7 days, sorted by date.</p>
+          </div>
+          <ul id="agendaList" class="agenda-list"></ul>
+          <div class="panel__hint">
+            <p>Tip: mark items done to keep your completion rate high.</p>
+            <div class="progress">
+              <div id="progressBar" class="progress__bar"></div>
+            </div>
+            <p id="progressLabel" class="muted"></p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
