@@ -13,12 +13,34 @@
         <p class="subtitle">Plan your classes, tasks, and assignments by day.</p>
       </div>
       <div class="header-actions">
-        <span class="subtitle">Autosync enabled</span>
+        <span class="subtitle badge">Autosync enabled</span>
       </div>
     </header>
 
     <main class="layout">
       <aside class="sidebar">
+        <section class="panel">
+          <h2>Overview</h2>
+          <div class="overview-grid">
+            <div class="overview-card">
+              <span>Total tasks</span>
+              <strong id="totalTasks">0</strong>
+            </div>
+            <div class="overview-card">
+              <span>Completed</span>
+              <strong id="completedTasks">0</strong>
+            </div>
+            <div class="overview-card">
+              <span>Due today</span>
+              <strong id="todayTasks">0</strong>
+            </div>
+          </div>
+          <div class="overview-footer">
+            <span>Next up</span>
+          </div>
+          <ul id="upcomingList" class="upcoming-list"></ul>
+        </section>
+
         <section class="panel">
           <h2>Classes</h2>
           <div id="classList" class="class-list"></div>

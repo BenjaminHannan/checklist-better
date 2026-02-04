@@ -27,6 +27,10 @@ const taskNotes = document.getElementById("taskNotes");
 const taskClass = document.getElementById("taskClass");
 const taskDone = document.getElementById("taskDone");
 const deleteTask = document.getElementById("deleteTask");
+const totalTasksEl = document.getElementById("totalTasks");
+const completedTasksEl = document.getElementById("completedTasks");
+const todayTasksEl = document.getElementById("todayTasks");
+const upcomingList = document.getElementById("upcomingList");
 const cloudForm = document.getElementById("cloudForm");
 const cloudEndpointInput = document.getElementById("cloudEndpoint");
 const syncNowBtn = document.getElementById("syncNow");
@@ -200,6 +204,7 @@ const renderCalendar = () => {
     const dayEl = document.createElement("div");
     dayEl.className = "day";
     if (!isCurrentMonth) dayEl.classList.add("inactive");
+    if ([0, 6].includes(date.getDay())) dayEl.classList.add("weekend");
     if (dateKey === todayKey) dayEl.classList.add("today");
     dayEl.dataset.date = dateKey;
 
@@ -229,6 +234,40 @@ const renderCalendar = () => {
     dayEl.addEventListener("click", () => openModal(dateKey));
     calendarGrid.appendChild(dayEl);
   }
+};
+
+const renderOverview = () => {
+  const todayKey = formatDateKey(new Date());
+  const totalTasks = data.tasks.length;
+  const completedTasks = data.tasks.filter((task) => task.done).length;
+  const todayTasks = data.tasks.filter((task) => task.date === todayKey).length;
+
+  totalTasksEl.textContent = totalTasks;
+  completedTasksEl.textContent = completedTasks;
+  todayTasksEl.textContent = todayTasks;
+
+  const upcoming = data.tasks
+    .filter((task) => !task.done)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 5);
+
+  upcomingList.innerHTML = "";
+  if (upcoming.length === 0) {
+    const empty = document.createElement("li");
+    empty.innerHTML = "<small>No upcoming tasks yet.</small>";
+    upcomingList.appendChild(empty);
+    return;
+  }
+
+  upcoming.forEach((task) => {
+    const item = document.createElement("li");
+    const classInfo = data.classes.find((entry) => entry.id === task.classId);
+    item.innerHTML = `
+      <span>${task.title}</span>
+      <small>${task.date}${classInfo ? ` • ${classInfo.name}` : ""}</small>
+    `;
+    upcomingList.appendChild(item);
+  });
 };
 
 const filterTasksByDate = (dateKey) => {
@@ -331,6 +370,7 @@ const deleteTaskById = (taskId) => {
 
 const renderAll = () => {
   renderClasses();
+  renderOverview();
   renderCalendar();
 };
 
