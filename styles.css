@@ -354,6 +354,34 @@ textarea {
   transition: width 0.3s ease;
 }
 
+.share-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.share-modal__content {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  width: min(420px, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.share-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .muted {
   color: var(--muted);
 }

@@ -45,8 +45,10 @@ const importInput = document.getElementById("importData");
 const prevMonth = document.getElementById("prevMonth");
 const nextMonth = document.getElementById("nextMonth");
 
+const FOCUS_LABEL_PREFIX = "Focus: ";
+
 function escapeHtml(value) {
-  if (typeof value !== "string") {
+  if (value === null || value === undefined || typeof value !== "string") {
     return "";
   }
   return value
@@ -58,7 +60,77 @@ function escapeHtml(value) {
 }
 
 function renderFocusTag() {
-  return "<span class=\"focus-tag\">★ Focus</span>";
+  return `<span class="focus-tag">${escapeHtml("★ Focus")}</span>`;
+}
+
+function renderFocusMarker() {
+  return "<div class=\"calendar__focus\">★</div>";
+}
+
+function showShareDialog(url) {
+  const overlay = document.createElement("div");
+  overlay.className = "share-modal";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.tabIndex = -1;
+
+  const content = document.createElement("div");
+  content.className = "share-modal__content";
+
+  const heading = document.createElement("h3");
+  heading.textContent = "Share link";
+
+  const description = document.createElement("p");
+  description.className = "muted";
+  description.textContent = "Copy this link to open your checklist on another device.";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.readOnly = true;
+  input.value = url;
+
+  const actions = document.createElement("div");
+  actions.className = "share-modal__actions";
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "button button--ghost";
+  closeButton.textContent = "Close";
+  actions.appendChild(closeButton);
+
+  content.appendChild(heading);
+  content.appendChild(description);
+  content.appendChild(input);
+  content.appendChild(actions);
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+  input.select();
+  overlay.focus();
+
+  const close = () => overlay.remove();
+  closeButton.addEventListener("click", close);
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      close();
+    }
+  });
+  overlay.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      close();
+    }
+  });
+}
+
+function toggleFocusForDay(item) {
+  const isFocused = item.focus;
+  state.items = state.items.map((entry) => {
+    if (entry.date !== item.date) {
+      return entry;
+    }
+    if (entry.id === item.id) {
+      return { ...entry, focus: !isFocused };
+    }
+    return { ...entry, focus: false };
+  });
 }
 
 function formatDate(date) {
@@ -106,7 +178,6 @@ function fromBase64(value) {
 
 function getShareUrl() {
   const payload = {
-    sharedAt: new Date().toISOString(),
     classes: state.classes,
     items: state.items,
   };
@@ -123,13 +194,14 @@ function loadFromShare() {
     const encoded = hash.replace("#share=", "");
     const decoded = fromBase64(encoded);
     const parsed = JSON.parse(decoded);
-    if (parsed?.classes && parsed?.items) {
-      state.classes = parsed.classes;
-      state.items = parsed.items;
-      saveState();
+    if (!Array.isArray(parsed?.classes) || !Array.isArray(parsed?.items)) {
+      throw new Error("Invalid share data");
     }
+    state.classes = parsed.classes;
+    state.items = parsed.items;
+    saveState();
   } catch (error) {
-    alert("That share link could not be loaded. It may be invalid or corrupted.");
+    alert("That share link could not be loaded. Please verify the link or request a new one.");
   } finally {
     window.history.replaceState({}, document.title, window.location.pathname);
   }
@@ -234,7 +306,7 @@ function renderCalendar() {
     }
     dayCell.innerHTML = `
       <div class="calendar__day-number">${date.getDate()}</div>
-      ${hasFocus ? "<div class=\"calendar__focus\">★</div>" : ""}
+      ${hasFocus ? renderFocusMarker() : ""}
       <div class="calendar__dots">
         ${dayClasses
           .slice(0, 4)
@@ -263,8 +335,11 @@ function renderItems() {
   );
   const completedCount = itemsForDay.filter((item) => item.done).length;
   const focusItem = itemsForDay.find((item) => item.focus);
-  const focusLabel = focusItem ? `Focus: ${focusItem.title}` : "Focus: none";
-  selectedDateStats.textContent = `${completedCount}/${itemsForDay.length} completed • ${focusLabel}`;
+  if (focusItem) {
+    selectedDateStats.innerHTML = `${completedCount}/${itemsForDay.length} completed • ${FOCUS_LABEL_PREFIX}${escapeHtml(focusItem.title)}`;
+  } else {
+    selectedDateStats.textContent = `${completedCount}/${itemsForDay.length} completed • ${FOCUS_LABEL_PREFIX}none`;
+  }
 
   itemList.innerHTML = "";
   if (itemsForDay.length === 0) {
@@ -440,16 +515,7 @@ itemList.addEventListener("click", (event) => {
     const id = focusButton.dataset.focus;
     const item = state.items.find((entry) => entry.id === id);
     if (!item) return;
-    const isFocused = item.focus;
-    state.items = state.items.map((entry) => {
-      if (entry.date !== item.date) {
-        return entry;
-      }
-      if (entry.id === item.id) {
-        return { ...entry, focus: !isFocused };
-      }
-      return { ...entry, focus: false };
-    });
+    toggleFocusForDay(item);
     saveState();
     renderAll();
   }
@@ -506,7 +572,7 @@ shareButton.addEventListener("click", async () => {
     await navigator.clipboard.writeText(shareUrl);
     alert("Share link copied to clipboard!");
   } catch (error) {
-    prompt("Copy this link to access your checklist on another device:", shareUrl);
+    showShareDialog(shareUrl);
   }
 });
 
