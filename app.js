@@ -99,7 +99,7 @@ const syncWithCloud = async (showStatus = true) => {
   if (showStatus) setSyncStatus("Syncing...");
 
   try {
-    const response = await fetch(endpoint, { method: "GET" });
+    const response = await fetch(`${endpoint}?t=${Date.now()}`, { method: "GET" });
     if (!response.ok) throw new Error("Failed to load");
     const remote = await response.json();
     const remoteUpdated = remote.updatedAt ?? 0;
@@ -120,7 +120,7 @@ const syncWithCloud = async (showStatus = true) => {
     if (localUpdated >= remoteUpdated) {
       await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(data),
       });
       if (showStatus) setSyncStatus("Synced to cloud", "connected");
@@ -271,6 +271,7 @@ const renderModalTasks = () => {
       <div>
         <strong>${task.title}</strong><br />
         <small>${classInfo ? classInfo.name : "General"}</small>
+        ${task.notes ? `<br /><small>${task.notes}</small>` : ""}
       </div>
       <div class="row">
         <button type="button" class="ghost" data-edit="${task.id}">Edit</button>
@@ -279,6 +280,10 @@ const renderModalTasks = () => {
     `;
     row.querySelector("[data-edit]").addEventListener("click", () => editTask(task.id));
     row.querySelector("[data-toggle]").addEventListener("click", () => toggleTask(task.id));
+    row.addEventListener("click", (event) => {
+      if (event.target.closest("button")) return;
+      editTask(task.id);
+    });
     modalBody.appendChild(row);
   });
 };

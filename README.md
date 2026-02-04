@@ -40,18 +40,16 @@ function doGet() {
   const sheet = getSheet_();
   const raw = sheet.getRange("A1").getValue();
   if (!raw) {
-    return ContentService.createTextOutput(JSON.stringify({ classes: [], tasks: [], updatedAt: 0 }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return createJsonOutput_({ classes: [], tasks: [], updatedAt: 0 });
   }
-  return ContentService.createTextOutput(raw).setMimeType(ContentService.MimeType.JSON);
+  return createJsonOutput_(JSON.parse(raw));
 }
 
 function doPost(e) {
   const sheet = getSheet_();
   const payload = e.postData.contents;
   sheet.getRange("A1").setValue(payload);
-  return ContentService.createTextOutput(JSON.stringify({ ok: true }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return createJsonOutput_({ ok: true });
 }
 
 function getSheet_() {
@@ -61,6 +59,12 @@ function getSheet_() {
     sheet = spreadsheet.insertSheet(SHEET_NAME);
   }
   return sheet;
+}
+
+function createJsonOutput_(payload) {
+  return ContentService.createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader("Access-Control-Allow-Origin", "*");
 }
 ```
 
