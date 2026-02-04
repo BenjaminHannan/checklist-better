@@ -45,6 +45,15 @@ const importInput = document.getElementById("importData");
 const prevMonth = document.getElementById("prevMonth");
 const nextMonth = document.getElementById("nextMonth");
 
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function formatDate(date) {
   return date.toISOString().slice(0, 10);
 }
@@ -73,13 +82,28 @@ function saveState() {
   }));
 }
 
+function toBase64(value) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
+}
+
+function fromBase64(value) {
+  const binary = atob(value);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
 function getShareUrl() {
   const payload = {
     sharedAt: new Date().toISOString(),
     classes: state.classes,
     items: state.items,
   };
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const encoded = toBase64(JSON.stringify(payload));
   return `${window.location.origin}${window.location.pathname}#share=${encoded}`;
 }
 
@@ -90,7 +114,7 @@ function loadFromShare() {
   }
   try {
     const encoded = hash.replace("#share=", "");
-    const decoded = decodeURIComponent(escape(atob(encoded)));
+    const decoded = fromBase64(encoded);
     const parsed = JSON.parse(decoded);
     if (parsed?.classes && parsed?.items) {
       state.classes = parsed.classes;
@@ -98,7 +122,7 @@ function loadFromShare() {
       saveState();
     }
   } catch (error) {
-    alert("That share link could not be loaded. Try sharing again.");
+    alert("That share link could not be loaded. It may be invalid or corrupted.");
   } finally {
     window.history.replaceState({}, document.title, window.location.pathname);
   }
@@ -232,7 +256,9 @@ function renderItems() {
   );
   const completedCount = itemsForDay.filter((item) => item.done).length;
   const focusItem = itemsForDay.find((item) => item.focus);
-  const focusLabel = focusItem ? `Focus: ${focusItem.title}` : "Focus: none";
+  const focusLabel = focusItem
+    ? `Focus: ${escapeHtml(focusItem.title)}`
+    : "Focus: none";
   selectedDateStats.textContent = `${completedCount}/${itemsForDay.length} completed • ${focusLabel}`;
 
   itemList.innerHTML = "";
@@ -253,7 +279,7 @@ function renderItems() {
             <input type="checkbox" data-toggle="${item.id}" ${
               item.done ? "checked" : ""
             } />
-            ${item.title}
+            ${escapeHtml(item.title)}
           </label>
           ${item.focus ? "<span class=\"focus-tag\">★ Focus</span>" : ""}
           <span class="badge" style="border-color:${klass?.color}">${
@@ -261,8 +287,8 @@ function renderItems() {
           }</span>
         </div>
         <div class="item-card__meta">
-          ${item.time ? `<span>⏰ ${item.time}</span>` : ""}
-          ${item.notes ? `<span>📝 ${item.notes}</span>` : ""}
+          ${item.time ? `<span>⏰ ${escapeHtml(item.time)}</span>` : ""}
+          ${item.notes ? `<span>📝 ${escapeHtml(item.notes)}</span>` : ""}
         </div>
         <div class="item-card__actions">
           <button class="link-button" data-focus="${item.id}">${
@@ -296,7 +322,7 @@ function renderAgenda() {
       const li = document.createElement("li");
       li.className = "agenda-item";
       li.innerHTML = `
-        <strong>${item.title}</strong>
+        <strong>${escapeHtml(item.title)}</strong>
         <span class="muted">${dayFormatter.format(new Date(item.date))}</span>
         ${item.focus ? "<span class=\"focus-tag\">★ Focus</span>" : ""}
         <span class="badge" style="border-color:${klass?.color}">${
