@@ -46,12 +46,19 @@ const prevMonth = document.getElementById("prevMonth");
 const nextMonth = document.getElementById("nextMonth");
 
 function escapeHtml(value) {
+  if (typeof value !== "string") {
+    return "";
+  }
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function renderFocusTag() {
+  return "<span class=\"focus-tag\">★ Focus</span>";
 }
 
 function formatDate(date) {
@@ -227,7 +234,7 @@ function renderCalendar() {
     }
     dayCell.innerHTML = `
       <div class="calendar__day-number">${date.getDate()}</div>
-      ${hasFocus ? `<div class="calendar__focus">★</div>` : ""}
+      ${hasFocus ? "<div class=\"calendar__focus\">★</div>" : ""}
       <div class="calendar__dots">
         ${dayClasses
           .slice(0, 4)
@@ -256,9 +263,7 @@ function renderItems() {
   );
   const completedCount = itemsForDay.filter((item) => item.done).length;
   const focusItem = itemsForDay.find((item) => item.focus);
-  const focusLabel = focusItem
-    ? `Focus: ${escapeHtml(focusItem.title)}`
-    : "Focus: none";
+  const focusLabel = focusItem ? `Focus: ${focusItem.title}` : "Focus: none";
   selectedDateStats.textContent = `${completedCount}/${itemsForDay.length} completed • ${focusLabel}`;
 
   itemList.innerHTML = "";
@@ -281,9 +286,9 @@ function renderItems() {
             } />
             ${escapeHtml(item.title)}
           </label>
-          ${item.focus ? "<span class=\"focus-tag\">★ Focus</span>" : ""}
+          ${item.focus ? renderFocusTag() : ""}
           <span class="badge" style="border-color:${klass?.color}">${
-            klass?.name || "Class"
+            escapeHtml(klass?.name) || "Class"
           }</span>
         </div>
         <div class="item-card__meta">
@@ -324,9 +329,9 @@ function renderAgenda() {
       li.innerHTML = `
         <strong>${escapeHtml(item.title)}</strong>
         <span class="muted">${dayFormatter.format(new Date(item.date))}</span>
-        ${item.focus ? "<span class=\"focus-tag\">★ Focus</span>" : ""}
+        ${item.focus ? renderFocusTag() : ""}
         <span class="badge" style="border-color:${klass?.color}">${
-          klass?.name || "Class"
+          escapeHtml(klass?.name) || "Class"
         }</span>
       `;
       agendaList.appendChild(li);
