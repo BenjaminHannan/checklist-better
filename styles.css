@@ -178,6 +178,20 @@ button:disabled {
   color: var(--muted);
 }
 
+.sync-status {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.sync-status.connected {
+  color: #16a34a;
+}
+
+.sync-status.error {
+  color: var(--danger);
+}
+
 .calendar {
   background: var(--panel);
   border: 1px solid var(--border);

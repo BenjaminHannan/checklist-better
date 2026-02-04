@@ -9,7 +9,7 @@ A calendar-style checklist app you can open anywhere (home, school, or on the go
 - **Per-day task lists** with completion toggles and notes.
 - **Quick add** panel to drop tasks onto any day.
 - **Filters** to focus on a single class or hide completed items.
-- **Export/Import** to move your data between devices (home/school).
+- **Cloud sync (free)** using Google Sheets + Apps Script so Chrome on a Chromebook can always stay updated.
 
 ## Getting started
 
@@ -26,7 +26,52 @@ You can publish this app on GitHub Pages so you can open it from anywhere.
 4. Save and wait for the URL to appear.
 5. Open that URL on any device.
 
-> Tip: Use the **Export** button at home and the **Import** button at school if you want to sync your tasks across browsers.
+### Cloud sync setup (Google Sheets + Apps Script)
+This keeps your data in a Google Sheet and syncs automatically from any Chrome browser.
+
+1. Create a new Google Sheet.
+2. Go to **Extensions → Apps Script**.
+3. Replace the script with the following:
+
+```javascript
+const SHEET_NAME = "Data";
+
+function doGet() {
+  const sheet = getSheet_();
+  const raw = sheet.getRange("A1").getValue();
+  if (!raw) {
+    return ContentService.createTextOutput(JSON.stringify({ classes: [], tasks: [], updatedAt: 0 }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(raw).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const sheet = getSheet_();
+  const payload = e.postData.contents;
+  sheet.getRange("A1").setValue(payload);
+  return ContentService.createTextOutput(JSON.stringify({ ok: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getSheet_() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(SHEET_NAME);
+  }
+  return sheet;
+}
+```
+
+4. Click **Deploy → New deployment**.
+5. Choose **Web app**.
+6. Set **Execute as** = Me.
+7. Set **Who has access** = Anyone with the link.
+8. Copy the web app URL.
+9. Paste the URL into the app’s **Cloud Sync** panel and click **Connect**.
+
+> Your data is stored in the sheet cell A1 as JSON. The app auto-syncs every 30 seconds and after edits.
 
 ## File overview
 

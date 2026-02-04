@@ -1,4 +1,6 @@
 const STORAGE_KEY = "checklist-calendar-data";
+const CLOUD_ENDPOINT_KEY = "checklist-calendar-endpoint";
+const SYNC_INTERVAL_MS = 30000;
 
 const monthLabel = document.getElementById("monthLabel");
 const calendarGrid = document.getElementById("calendarGrid");
@@ -25,8 +27,10 @@ const taskNotes = document.getElementById("taskNotes");
 const taskClass = document.getElementById("taskClass");
 const taskDone = document.getElementById("taskDone");
 const deleteTask = document.getElementById("deleteTask");
-const exportBtn = document.getElementById("exportData");
-const importInput = document.getElementById("importData");
+const cloudForm = document.getElementById("cloudForm");
+const cloudEndpointInput = document.getElementById("cloudEndpoint");
+const syncNowBtn = document.getElementById("syncNow");
+const syncStatus = document.getElementById("syncStatus");
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -37,6 +41,7 @@ const defaultData = {
     { id: "general", name: "General", color: "#4f46e5" },
   ],
   tasks: [],
+  updatedAt: 0,
 };
 
 const loadData = () => {
@@ -47,6 +52,7 @@ const loadData = () => {
     return {
       classes: parsed.classes?.length ? parsed.classes : defaultData.classes,
       tasks: parsed.tasks ?? [],
+      updatedAt: parsed.updatedAt ?? 0,
     };
   } catch (error) {
     console.error("Failed to parse data", error);
@@ -55,9 +61,74 @@ const loadData = () => {
 };
 
 let data = loadData();
+let syncTimer = null;
+
+const getCloudEndpoint = () => localStorage.getItem(CLOUD_ENDPOINT_KEY) || "";
+
+const setSyncStatus = (message, tone = "") => {
+  syncStatus.textContent = message;
+  syncStatus.classList.remove("connected", "error");
+  if (tone) syncStatus.classList.add(tone);
+};
 
 const saveData = () => {
+  data.updatedAt = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
+
+const scheduleSync = () => {
+  if (!getCloudEndpoint()) return;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    syncWithCloud(false);
+  }, 1200);
+};
+
+const saveDataAndSync = () => {
+  saveData();
+  scheduleSync();
+};
+
+const syncWithCloud = async (showStatus = true) => {
+  const endpoint = getCloudEndpoint();
+  if (!endpoint) {
+    if (showStatus) setSyncStatus("Not connected");
+    return;
+  }
+
+  if (showStatus) setSyncStatus("Syncing...");
+
+  try {
+    const response = await fetch(endpoint, { method: "GET" });
+    if (!response.ok) throw new Error("Failed to load");
+    const remote = await response.json();
+    const remoteUpdated = remote.updatedAt ?? 0;
+    const localUpdated = data.updatedAt ?? 0;
+
+    if (remoteUpdated > localUpdated) {
+      data = {
+        classes: remote.classes?.length ? remote.classes : defaultData.classes,
+        tasks: remote.tasks ?? [],
+        updatedAt: remoteUpdated,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      renderAll();
+      if (showStatus) setSyncStatus("Synced from cloud", "connected");
+      return;
+    }
+
+    if (localUpdated >= remoteUpdated) {
+      await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (showStatus) setSyncStatus("Synced to cloud", "connected");
+    }
+  } catch (error) {
+    console.error(error);
+    if (showStatus) setSyncStatus("Sync failed. Check your URL.", "error");
+  }
 };
 
 const formatDateKey = (date) => date.toISOString().slice(0, 10);
@@ -107,7 +178,7 @@ const removeClass = (classId) => {
   data.tasks = data.tasks.map((task) =>
     task.classId === classId ? { ...task, classId: "general" } : task
   );
-  saveData();
+  saveDataAndSync();
   renderAll();
 };
 
@@ -227,7 +298,7 @@ const toggleTask = (taskId) => {
   data.tasks = data.tasks.map((task) =>
     task.id === taskId ? { ...task, done: !task.done } : task
   );
-  saveData();
+  saveDataAndSync();
   renderAll();
   if (selectedDate) renderModalTasks();
 };
@@ -269,7 +340,7 @@ classForm.addEventListener("submit", (event) => {
   });
   classForm.reset();
   classColorInput.value = "#4f46e5";
-  saveData();
+  saveDataAndSync();
   renderAll();
 });
 
@@ -282,7 +353,7 @@ quickAddForm.addEventListener("submit", (event) => {
     notes: "",
   });
   quickAddForm.reset();
-  saveData();
+  saveDataAndSync();
   renderAll();
 });
 
@@ -330,7 +401,7 @@ taskForm.addEventListener("submit", (event) => {
     addTask({ ...payload, date: selectedDate });
   }
 
-  saveData();
+  saveDataAndSync();
   renderAll();
   renderModalTasks();
   taskForm.reset();
@@ -342,7 +413,7 @@ taskForm.addEventListener("submit", (event) => {
 deleteTask.addEventListener("click", () => {
   if (!editingTaskId) return;
   deleteTaskById(editingTaskId);
-  saveData();
+  saveDataAndSync();
   renderAll();
   renderModalTasks();
   taskForm.reset();
@@ -351,34 +422,26 @@ deleteTask.addEventListener("click", () => {
   deleteTask.classList.add("hidden");
 });
 
-exportBtn.addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "checklist-calendar-data.json";
-  link.click();
-  URL.revokeObjectURL(url);
+cloudForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const endpoint = cloudEndpointInput.value.trim();
+  if (!endpoint) return;
+  localStorage.setItem(CLOUD_ENDPOINT_KEY, endpoint);
+  setSyncStatus("Connected. Syncing...", "connected");
+  syncWithCloud(true);
 });
 
-importInput.addEventListener("change", (event) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (loadEvent) => {
-    try {
-      const imported = JSON.parse(loadEvent.target.result);
-      if (imported && imported.classes && imported.tasks) {
-        data = imported;
-        saveData();
-        renderAll();
-      }
-    } catch (error) {
-      console.error("Invalid import file", error);
-    }
-  };
-  reader.readAsText(file);
-  importInput.value = "";
-});
+syncNowBtn.addEventListener("click", () => syncWithCloud(true));
+
+const initCloud = () => {
+  const endpoint = getCloudEndpoint();
+  if (endpoint) {
+    cloudEndpointInput.value = endpoint;
+    setSyncStatus("Connected", "connected");
+    syncWithCloud(false);
+    setInterval(() => syncWithCloud(false), SYNC_INTERVAL_MS);
+  }
+};
 
 renderAll();
+initCloud();
