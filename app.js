@@ -40,6 +40,7 @@ const progressBar = document.getElementById("progressBar");
 const progressLabel = document.getElementById("progressLabel");
 
 const exportButton = document.getElementById("exportData");
+const shareButton = document.getElementById("shareData");
 const importInput = document.getElementById("importData");
 const prevMonth = document.getElementById("prevMonth");
 const nextMonth = document.getElementById("nextMonth");
@@ -70,6 +71,37 @@ function saveState() {
     classes: state.classes,
     items: state.items,
   }));
+}
+
+function getShareUrl() {
+  const payload = {
+    sharedAt: new Date().toISOString(),
+    classes: state.classes,
+    items: state.items,
+  };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  return `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+}
+
+function loadFromShare() {
+  const hash = window.location.hash;
+  if (!hash.startsWith("#share=")) {
+    return;
+  }
+  try {
+    const encoded = hash.replace("#share=", "");
+    const decoded = decodeURIComponent(escape(atob(encoded)));
+    const parsed = JSON.parse(decoded);
+    if (parsed?.classes && parsed?.items) {
+      state.classes = parsed.classes;
+      state.items = parsed.items;
+      saveState();
+    }
+  } catch (error) {
+    alert("That share link could not be loaded. Try sharing again.");
+  } finally {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 }
 
 function renderClasses() {
@@ -156,6 +188,7 @@ function renderCalendar() {
     const dayClasses = [...new Set(dayItems.map((item) => item.classId))]
       .map((classId) => state.classes.find((klass) => klass.id === classId))
       .filter(Boolean);
+    const hasFocus = dayItems.some((item) => item.focus);
 
     const dayCell = document.createElement("div");
     dayCell.className = "calendar__day";
@@ -165,8 +198,12 @@ function renderCalendar() {
     if (dateString === state.selectedDate) {
       dayCell.classList.add("calendar__day--selected");
     }
+    if (hasFocus) {
+      dayCell.classList.add("calendar__day--focus");
+    }
     dayCell.innerHTML = `
       <div class="calendar__day-number">${date.getDate()}</div>
+      ${hasFocus ? `<div class="calendar__focus">★</div>` : ""}
       <div class="calendar__dots">
         ${dayClasses
           .slice(0, 4)
@@ -194,7 +231,9 @@ function renderItems() {
     new Date(state.selectedDate)
   );
   const completedCount = itemsForDay.filter((item) => item.done).length;
-  selectedDateStats.textContent = `${completedCount}/${itemsForDay.length} completed`;
+  const focusItem = itemsForDay.find((item) => item.focus);
+  const focusLabel = focusItem ? `Focus: ${focusItem.title}` : "Focus: none";
+  selectedDateStats.textContent = `${completedCount}/${itemsForDay.length} completed • ${focusLabel}`;
 
   itemList.innerHTML = "";
   if (itemsForDay.length === 0) {
@@ -207,7 +246,7 @@ function renderItems() {
     .forEach((item) => {
       const klass = state.classes.find((entry) => entry.id === item.classId);
       const li = document.createElement("li");
-      li.className = "item-card";
+      li.className = `item-card${item.focus ? " item-card--focus" : ""}`;
       li.innerHTML = `
         <div class="item-card__header">
           <label class="item-card__title">
@@ -216,6 +255,7 @@ function renderItems() {
             } />
             ${item.title}
           </label>
+          ${item.focus ? "<span class=\"focus-tag\">★ Focus</span>" : ""}
           <span class="badge" style="border-color:${klass?.color}">${
             klass?.name || "Class"
           }</span>
@@ -225,6 +265,9 @@ function renderItems() {
           ${item.notes ? `<span>📝 ${item.notes}</span>` : ""}
         </div>
         <div class="item-card__actions">
+          <button class="link-button" data-focus="${item.id}">${
+            item.focus ? "Unfocus" : "Focus"
+          }</button>
           <button class="link-button" data-copy="${item.id}">Copy</button>
           <button class="link-button" data-remove="${item.id}">Delete</button>
         </div>
@@ -255,6 +298,7 @@ function renderAgenda() {
       li.innerHTML = `
         <strong>${item.title}</strong>
         <span class="muted">${dayFormatter.format(new Date(item.date))}</span>
+        ${item.focus ? "<span class=\"focus-tag\">★ Focus</span>" : ""}
         <span class="badge" style="border-color:${klass?.color}">${
           klass?.name || "Class"
         }</span>
@@ -321,6 +365,7 @@ itemForm.addEventListener("submit", (event) => {
     classId: itemClass.value,
     notes: itemNotes.value.trim(),
     done: false,
+    focus: false,
   });
   itemTitle.value = "";
   itemTime.value = "";
@@ -355,6 +400,25 @@ itemList.addEventListener("click", (event) => {
     if (!item) return;
     const copy = { ...item, id: crypto.randomUUID(), date: state.selectedDate };
     state.items.push(copy);
+    saveState();
+    renderAll();
+    return;
+  }
+  const focusButton = event.target.closest("button[data-focus]");
+  if (focusButton) {
+    const id = focusButton.dataset.focus;
+    const item = state.items.find((entry) => entry.id === id);
+    if (!item) return;
+    const isFocused = item.focus;
+    state.items = state.items.map((entry) => {
+      if (entry.date !== item.date) {
+        return entry;
+      }
+      if (entry.id === item.id) {
+        return { ...entry, focus: !isFocused };
+      }
+      return { ...entry, focus: false };
+    });
     saveState();
     renderAll();
   }
@@ -393,6 +457,28 @@ exportButton.addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
+shareButton.addEventListener("click", async () => {
+  const shareUrl = getShareUrl();
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "Checklist Better",
+        text: "Open this checklist on another device.",
+        url: shareUrl,
+      });
+      return;
+    } catch (error) {
+      // fall back to clipboard
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    alert("Share link copied to clipboard!");
+  } catch (error) {
+    prompt("Copy this link to access your checklist on another device:", shareUrl);
+  }
+});
+
 importInput.addEventListener("change", (event) => {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -412,4 +498,5 @@ importInput.addEventListener("change", (event) => {
 });
 
 loadState();
+loadFromShare();
 renderAll();

@@ -238,8 +238,20 @@ textarea {
   box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
 
+.calendar__day--focus {
+  border-color: #f59e0b;
+}
+
 .calendar__day-number {
   font-weight: 600;
+}
+
+.calendar__focus {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.85rem;
+  color: #f59e0b;
 }
 
 .calendar__dots {
@@ -260,6 +272,11 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.item-card--focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 
 .item-card__header {
@@ -291,6 +308,17 @@ textarea {
   color: var(--primary);
   cursor: pointer;
   font-weight: 600;
+}
+
+.focus-tag {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 247, 237, 0.8);
 }
 
 .badge {
