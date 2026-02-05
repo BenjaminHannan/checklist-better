@@ -15,6 +15,7 @@ const quickAddForm = document.getElementById("quickAddForm");
 const quickTitle = document.getElementById("quickTitle");
 const quickDate = document.getElementById("quickDate");
 const quickClass = document.getElementById("quickClass");
+const quickNotes = document.getElementById("quickNotes");
 const searchInput = document.getElementById("taskSearch");
 const filterClass = document.getElementById("filterClass");
 const upcomingOnly = document.getElementById("upcomingOnly");
@@ -43,6 +44,8 @@ const syncNowBtn = document.getElementById("syncNow");
 const syncStatus = document.getElementById("syncStatus");
 const themeToggle = document.getElementById("themeToggle");
 const streakCount = document.getElementById("streakCount");
+const createButtons = document.querySelectorAll("[data-create]");
+const createForms = document.querySelectorAll(".create-form");
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -281,10 +284,17 @@ const renderCalendar = () => {
       pill.style.background = classInfo ? `${classInfo.color}22` : "var(--accent)";
       pill.innerHTML = `
         <span class="task-pill-title">${task.title}</span>
-        <button type="button" class="task-clear" aria-label="Clear task">✕</button>
+        <div class="task-pill-actions">
+          <button type="button" class="task-complete" aria-label="Complete task">✓</button>
+          <button type="button" class="task-clear" aria-label="Clear task">✕</button>
+        </div>
       `;
       pill.addEventListener("dragstart", (event) => {
         event.dataTransfer.setData("text/plain", task.id);
+      });
+      pill.querySelector(".task-complete").addEventListener("click", (event) => {
+        event.stopPropagation();
+        setTaskDone(task.id, !task.done);
       });
       pill.querySelector(".task-clear").addEventListener("click", (event) => {
         event.stopPropagation();
@@ -558,6 +568,12 @@ const renderAll = () => {
   renderCalendar();
 };
 
+const showCreateForm = (type) => {
+  createForms.forEach((form) => {
+    form.hidden = form.dataset.form !== type;
+  });
+};
+
 classForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const name = classNameInput.value.trim();
@@ -579,9 +595,10 @@ quickAddForm.addEventListener("submit", (event) => {
     title: quickTitle.value.trim(),
     date: quickDate.value,
     classId: quickClass.value,
-    notes: "",
+    notes: quickNotes.value.trim(),
   });
   quickAddForm.reset();
+  if (quickNotes) quickNotes.value = "";
   saveDataAndSync();
   renderAll();
 });
@@ -598,6 +615,13 @@ filterClass.addEventListener("change", rerenderAll);
 hideCompleted.addEventListener("change", rerenderAll);
 upcomingOnly.addEventListener("change", rerenderAll);
 searchInput.addEventListener("input", rerenderAll);
+
+createButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = button.dataset.create;
+    if (target) showCreateForm(target);
+  });
+});
 
 prevMonth.addEventListener("click", () => {
   currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);

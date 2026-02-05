@@ -54,26 +54,43 @@
           <ul id="upcomingList" class="upcoming-list"></ul>
         </section>
 
-        <section class="panel">
-          <h2>Classes</h2>
-          <div id="classList" class="class-list"></div>
-          <form id="classForm" class="stack">
-            <input id="className" type="text" placeholder="Add class name" required />
-            <div class="row">
-              <input id="classColor" type="color" value="#4f46e5" />
-              <button type="submit">Add Class</button>
+        <section class="panel create-panel">
+          <div class="create-header">
+            <h2>Create</h2>
+            <div class="create-menu">
+              <button id="createButton" type="button" class="ghost create-button" aria-label="Create">
+                ＋
+              </button>
+              <div class="create-options" role="menu">
+                <button type="button" class="ghost" data-create="task">New Task</button>
+                <button type="button" class="ghost" data-create="class">New Class</button>
+              </div>
             </div>
-          </form>
+          </div>
+          <div class="create-forms">
+            <form id="quickAddForm" class="stack create-form" data-form="task" hidden>
+              <input id="quickTitle" type="text" placeholder="Task title" required />
+              <input id="quickDate" type="date" required />
+              <select id="quickClass"></select>
+              <details class="optional-details">
+                <summary>Optional details</summary>
+                <textarea id="quickNotes" placeholder="Notes (optional)"></textarea>
+              </details>
+              <button type="submit">Add Task</button>
+            </form>
+            <form id="classForm" class="stack create-form" data-form="class" hidden>
+              <input id="className" type="text" placeholder="Add class name" required />
+              <div class="row">
+                <input id="classColor" type="color" value="#4f46e5" />
+                <button type="submit">Add Class</button>
+              </div>
+            </form>
+          </div>
         </section>
 
         <section class="panel">
-          <h2>Quick Add</h2>
-          <form id="quickAddForm" class="stack">
-            <input id="quickTitle" type="text" placeholder="Task title" required />
-            <input id="quickDate" type="date" required />
-            <select id="quickClass"></select>
-            <button type="submit">Add Task</button>
-          </form>
+          <h2>Classes</h2>
+          <div id="classList" class="class-list"></div>
         </section>
 
         <section class="panel">

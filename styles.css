@@ -136,6 +136,80 @@ h2 {
   box-shadow: var(--shadow);
 }
 
+.create-panel {
+  position: relative;
+}
+
+.create-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.create-menu {
+  position: relative;
+}
+
+.create-button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+}
+
+.create-options {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem;
+  box-shadow: var(--shadow-soft);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 2;
+}
+
+.create-menu:hover .create-options,
+.create-menu:focus-within .create-options {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.create-options button {
+  width: 100%;
+  justify-content: center;
+}
+
+.create-forms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.optional-details {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.optional-details summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -490,8 +564,7 @@ button:hover:not(:disabled) {
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.upcoming-task:hover .task-clear-button,
-.task-pill:hover .task-clear {
+.upcoming-task:hover .task-clear-button {
   opacity: 1;
   transform: translateY(0);
 }
@@ -563,7 +636,7 @@ button:hover:not(:disabled) {
 
 .task-pill {
   font-size: 0.75rem;
-  padding: 0.2rem 1.6rem 0.2rem 0.5rem;
+  padding: 0.2rem 2.6rem 0.2rem 0.5rem;
   border-radius: 999px;
   background: rgba(99, 102, 241, 0.2);
   color: var(--text);
@@ -584,11 +657,18 @@ button:hover:not(:disabled) {
   white-space: nowrap;
 }
 
-.task-clear {
+.task-pill-actions {
   position: absolute;
   right: 0.3rem;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  gap: 0.2rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.task-clear {
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.15);
   color: inherit;
@@ -599,13 +679,35 @@ button:hover:not(:disabled) {
   padding: 0;
   display: grid;
   place-items: center;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.task-complete {
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.2);
+  color: #16a34a;
+  font-size: 0.7rem;
+  line-height: 1;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .task-clear:hover {
   background: rgba(239, 68, 68, 0.2);
   color: var(--danger);
+}
+
+.task-complete:hover {
+  background: rgba(34, 197, 94, 0.35);
+  color: #15803d;
+}
+
+.task-pill:hover .task-pill-actions {
+  opacity: 1;
 }
 
 .task-pill.done {
@@ -633,7 +735,7 @@ button:hover:not(:disabled) {
 }
 
 .modal-content {
-  background: var(--panel);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.75));
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4) var(--space-4);
   width: min(520px, 100%);
@@ -641,6 +743,7 @@ button:hover:not(:disabled) {
   overflow: auto;
   border: 1px solid var(--border);
   backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
 }
 
 .modal-header {
@@ -648,6 +751,13 @@ button:hover:not(:disabled) {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 #modalBody {
@@ -659,14 +769,14 @@ button:hover:not(:disabled) {
 
 .task-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-1);
   border: 1px solid var(--border);
   padding: 0.6rem 0.75rem;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.8);
-  transition: background 0.2s ease;
+  background: rgba(255, 255, 255, 0.85);
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .task-row small {
@@ -675,6 +785,12 @@ button:hover:not(:disabled) {
 
 .task-row:hover {
   background: rgba(148, 163, 184, 0.2);
+  transform: translateY(-1px);
+}
+
+.task-row .row button {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
 }
 
 @media (max-width: 960px) {
@@ -727,6 +843,19 @@ button:hover:not(:disabled) {
 [data-theme="dark"] .task-pill.overdue {
   background: rgba(248, 113, 113, 0.35);
   color: #fecaca;
+}
+
+[data-theme="dark"] .modal-content {
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.9));
+}
+
+[data-theme="dark"] .optional-details,
+[data-theme="dark"] .create-options {
+  background: rgba(30, 41, 59, 0.85);
+}
+
+[data-theme="dark"] .task-complete {
+  color: #34d399;
 }
 
 [data-theme="dark"] input[type="color"] {
