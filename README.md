@@ -93,3 +93,5 @@ function createJsonOutput_(payload) {
 ---
 
 Enjoy organizing your classes!
+
+https://script.google.com/macros/s/AKfycbyTHK8rlnrEB4tg9uN1Nn_mdRrJqIWIL1xjosaa0oqBUe_etNfJxsvHUxiuFNMDaj2VeQ/exec
