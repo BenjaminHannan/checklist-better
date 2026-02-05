@@ -1,14 +1,14 @@
 :root {
   color-scheme: light;
-  --bg: #0f172a;
-  --panel: rgba(255, 255, 255, 0.7);
-  --panel-muted: rgba(255, 255, 255, 0.6);
-  --text: #0f172a;
+  --bg: #f4f6fb;
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-muted: rgba(255, 255, 255, 0.72);
+  --text: #0b1220;
   --muted: #5b677a;
-  --primary: #6366f1;
+  --primary: #4f46e5;
   --primary-soft: rgba(99, 102, 241, 0.15);
   --border: rgba(148, 163, 184, 0.4);
-  --accent: rgba(129, 140, 248, 0.2);
+  --accent: rgba(129, 140, 248, 0.18);
   --danger: #ef4444;
   --shadow: 0 24px 40px rgba(15, 23, 42, 0.2);
   --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.16);
@@ -45,10 +45,10 @@ body {
   margin: 0;
   font-family: "Inter", system-ui, sans-serif;
   background:
-    radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.35), transparent 45%),
-    radial-gradient(circle at 80% 10%, rgba(59, 130, 246, 0.35), transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(15, 23, 42, 0.45), transparent 55%),
-    #0f172a;
+    radial-gradient(circle at 20% 20%, rgba(167, 139, 250, 0.12), transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.12), transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(15, 23, 42, 0.06), transparent 55%),
+    #f4f6fb;
   color: var(--text);
   line-height: 1.5;
 }
@@ -265,26 +265,31 @@ button:hover:not(:disabled) {
 
 .overview-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-1);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
   margin-bottom: var(--space-2);
 }
 
 .overview-card {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: var(--radius-sm);
-  padding: 0.6rem;
+  padding: 0.85rem;
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.85rem;
+  gap: 0.4rem;
+  font-size: 0.82rem;
   color: var(--muted);
+  min-height: 92px;
+  word-break: break-word;
+  align-items: flex-start;
 }
 
 .overview-card strong {
-  font-size: 1.3rem;
+  font-size: 1rem;
   color: var(--text);
+  line-height: 1.25;
+  display: block;
 }
 
 .overview-footer {
@@ -329,18 +334,25 @@ button:hover:not(:disabled) {
 }
 
 .upcoming-list li {
-  padding: 0.45rem 0.6rem;
+  padding: 0.55rem 0.75rem;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border);
   font-size: 0.85rem;
   color: var(--text);
   display: flex;
   justify-content: space-between;
+  gap: var(--space-1);
 }
 
 .upcoming-list small {
   color: var(--muted);
+}
+
+.overview-card span,
+.upcoming-list span {
+  word-break: break-word;
+  font-weight: 600;
 }
 
 .sync-status {
@@ -441,6 +453,10 @@ button:hover:not(:disabled) {
   align-items: center;
   justify-content: space-between;
   gap: 0.25rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .task-pill.done {
@@ -540,18 +556,28 @@ button:hover:not(:disabled) {
 }
 [data-theme="dark"] body {
   background:
-    radial-gradient(circle at 20% 20%, rgba(109, 40, 217, 0.35), transparent 45%),
-    radial-gradient(circle at 80% 10%, rgba(14, 116, 144, 0.4), transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(2, 6, 23, 0.7), transparent 60%),
-    #0f172a;
+    radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.45), transparent 45%),
+    radial-gradient(circle at 80% 12%, rgba(56, 189, 248, 0.35), transparent 40%),
+    radial-gradient(circle at 50% 85%, rgba(2, 6, 23, 0.8), transparent 60%),
+    #0b1120;
 }
 
 [data-theme="dark"] .day,
 [data-theme="dark"] .overview-card,
 [data-theme="dark"] .upcoming-list li,
 [data-theme="dark"] .task-row {
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(30, 41, 59, 0.78);
   color: var(--text);
+}
+
+[data-theme="dark"] .task-pill {
+  background: rgba(129, 140, 248, 0.35);
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .task-pill.overdue {
+  background: rgba(248, 113, 113, 0.35);
+  color: #fecaca;
 }
 
 [data-theme="dark"] input,
