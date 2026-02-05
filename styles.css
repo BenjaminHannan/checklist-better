@@ -264,7 +264,12 @@ button:hover:not(:disabled) {
 }
 
 .checkbox input {
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  accent-color: var(--primary);
+  cursor: pointer;
 }
 
 .overview-grid {
