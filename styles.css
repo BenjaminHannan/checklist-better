@@ -1,14 +1,14 @@
 :root {
   color-scheme: light;
-  --bg: #f6f7fb;
+  --bg: #f3f4f8;
   --panel: #ffffff;
-  --panel-muted: #f9fafc;
+  --panel-muted: #f1f3f9;
   --text: #0f172a;
   --muted: #64748b;
-  --primary: #4f46e5;
-  --primary-soft: #eef2ff;
+  --primary: #2563eb;
+  --primary-soft: #e0e7ff;
   --border: #e5e7eb;
-  --accent: #e0e7ff;
+  --accent: #dbeafe;
   --danger: #ef4444;
   --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
   --shadow-soft: 0 6px 14px rgba(15, 23, 42, 0.06);
@@ -29,7 +29,7 @@
 body {
   margin: 0;
   font-family: "Inter", system-ui, sans-serif;
-  background: var(--bg);
+  background: linear-gradient(180deg, #eef2ff 0%, #f3f4f8 35%, #f8fafc 100%);
   color: var(--text);
   line-height: 1.5;
 }
@@ -50,7 +50,7 @@ p {
   justify-content: space-between;
   padding: var(--space-4) var(--space-5);
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
@@ -81,16 +81,18 @@ h2 {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: var(--space-4);
-  padding: var(--space-4) var(--space-5) var(--space-5);
+  padding: var(--space-5);
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  background: var(--panel-muted);
+  background: rgba(255, 255, 255, 0.7);
   border-radius: var(--radius-lg);
-  padding: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
 }
 
 .panel {
@@ -161,7 +163,7 @@ button {
 }
 
 button.ghost {
-  background: var(--primary-soft);
+  background: #eef2ff;
   color: var(--primary);
 }
 
@@ -248,10 +250,10 @@ button:hover:not(:disabled) {
 }
 
 .overview-card {
-  background: var(--panel-muted);
+  background: #ffffff;
   border-radius: var(--radius-sm);
   padding: 0.6rem;
-  border: 1px solid var(--border);
+  border: 1px solid #edf2f7;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -260,7 +262,7 @@ button:hover:not(:disabled) {
 }
 
 .overview-card strong {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--text);
 }
 
@@ -277,7 +279,7 @@ button:hover:not(:disabled) {
   width: 100%;
   height: 8px;
   border-radius: 999px;
-  background: #e5e7eb;
+  background: #e2e8f0;
   margin-bottom: 0.35rem;
   overflow: hidden;
 }
@@ -285,7 +287,7 @@ button:hover:not(:disabled) {
 .progress-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #4f46e5, #818cf8);
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
   border-radius: inherit;
   transition: width 0.3s ease;
 }
@@ -308,7 +310,8 @@ button:hover:not(:disabled) {
 .upcoming-list li {
   padding: 0.45rem 0.6rem;
   border-radius: var(--radius-sm);
-  background: var(--panel-muted);
+  background: #ffffff;
+  border: 1px solid #edf2f7;
   font-size: 0.85rem;
   color: var(--text);
   display: flex;
@@ -369,8 +372,8 @@ button:hover:not(:disabled) {
 
 .day {
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  padding: var(--space-1);
+  border: 1px solid #e5e7eb;
+  padding: var(--space-2);
   min-height: 110px;
   background: #fff;
   display: flex;
@@ -387,18 +390,18 @@ button:hover:not(:disabled) {
 }
 
 .day.weekend {
-  border-color: #dbeafe;
-  background: var(--panel-muted);
+  border-color: #cfe0ff;
+  background: #f8fafc;
 }
 
 .day:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.12);
 }
 
 .day.today {
   outline: 2px solid var(--primary);
-  background: var(--primary-soft);
+  background: #eff6ff;
 }
 
 .day-number {
@@ -410,7 +413,7 @@ button:hover:not(:disabled) {
   font-size: 0.75rem;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: var(--accent);
+  background: #e0e7ff;
   color: var(--text);
   display: flex;
   align-items: center;
@@ -424,8 +427,8 @@ button:hover:not(:disabled) {
 }
 
 .task-pill.overdue {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #ffe4e6;
+  color: #be123c;
 }
 
 .modal {
@@ -473,7 +476,7 @@ button:hover:not(:disabled) {
   border: 1px solid var(--border);
   padding: 0.6rem 0.75rem;
   border-radius: var(--radius-sm);
-  background: var(--panel-muted);
+  background: #ffffff;
   transition: background 0.2s ease;
 }
 
@@ -482,7 +485,7 @@ button:hover:not(:disabled) {
 }
 
 .task-row:hover {
-  background: #eef2ff;
+  background: #eff6ff;
 }
 
 @media (max-width: 960px) {
