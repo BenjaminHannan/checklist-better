@@ -14,6 +14,7 @@
       </div>
       <div class="header-actions">
         <span class="subtitle badge">Autosync enabled</span>
+        <button id="themeToggle" class="ghost" type="button" aria-label="Toggle theme">🌙</button>
       </div>
     </header>
 
@@ -25,6 +26,10 @@
             <div class="overview-card">
               <span>Total tasks</span>
               <strong id="totalTasks">0</strong>
+            </div>
+            <div class="overview-card">
+              <span>Streak</span>
+              <strong id="streakCount">🔥 0 Day Streak</strong>
             </div>
             <div class="overview-card">
               <span>Completed</span>
@@ -137,6 +142,7 @@
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

@@ -39,6 +39,8 @@ const cloudForm = document.getElementById("cloudForm");
 const cloudEndpointInput = document.getElementById("cloudEndpoint");
 const syncNowBtn = document.getElementById("syncNow");
 const syncStatus = document.getElementById("syncStatus");
+const themeToggle = document.getElementById("themeToggle");
+const streakCount = document.getElementById("streakCount");
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -82,6 +84,16 @@ const setSyncStatus = (message, tone = "") => {
 const saveData = () => {
   data.updatedAt = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
+
+const applyTheme = (theme) => {
+  if (theme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+    themeToggle.textContent = "☀️";
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    themeToggle.textContent = "🌙";
+  }
 };
 
 const scheduleSync = () => {
@@ -161,6 +173,22 @@ const matchesQuery = (task, query) => {
     .join(" ")
     .toLowerCase();
   return haystack.includes(query.toLowerCase());
+};
+
+const calculateStreak = () => {
+  const completedByDay = new Set(
+    data.tasks.filter((task) => task.done).map((task) => task.date)
+  );
+  let streak = 0;
+  let cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  while (true) {
+    const key = formatDateKey(cursor);
+    if (!completedByDay.has(key)) break;
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
 };
 
 const getMonthDetails = (date) => {
@@ -245,9 +273,14 @@ const renderCalendar = () => {
       pill.className = "task-pill";
       if (task.done) pill.classList.add("done");
       if (!task.done && dateKey < todayKey) pill.classList.add("overdue");
+      pill.draggable = true;
+      pill.dataset.taskId = task.id;
       const classInfo = data.classes.find((item) => item.id === task.classId);
       pill.style.background = classInfo ? `${classInfo.color}22` : "var(--accent)";
       pill.innerHTML = `<span>${task.title}</span>`;
+      pill.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", task.id);
+      });
       dayEl.appendChild(pill);
     });
 
@@ -259,6 +292,18 @@ const renderCalendar = () => {
     }
 
     dayEl.addEventListener("click", () => openModal(dateKey));
+    dayEl.addEventListener("dragover", (event) => {
+      event.preventDefault();
+    });
+    dayEl.addEventListener("drop", (event) => {
+      event.preventDefault();
+      const taskId = event.dataTransfer.getData("text/plain");
+      if (!taskId) return;
+      updateTask(taskId, { date: dateKey });
+      saveDataAndSync();
+      renderAll();
+      if (selectedDate) renderModalTasks();
+    });
     calendarGrid.appendChild(dayEl);
   }
 };
@@ -269,12 +314,14 @@ const renderOverview = () => {
   const completedTasks = data.tasks.filter((task) => task.done).length;
   const todayTasks = data.tasks.filter((task) => task.date === todayKey).length;
   const completionRate = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+  const streak = calculateStreak();
 
   totalTasksEl.textContent = totalTasks;
   completedTasksEl.textContent = completedTasks;
   todayTasksEl.textContent = todayTasks;
   progressFill.style.width = `${completionRate}%`;
   progressLabel.textContent = `${completionRate}% complete`;
+  streakCount.textContent = `🔥 ${streak} Day Streak`;
 
   const query = searchInput.value.trim();
   const upcoming = data.tasks
@@ -374,12 +421,19 @@ const editTask = (taskId) => {
 };
 
 const toggleTask = (taskId) => {
-  data.tasks = data.tasks.map((task) =>
-    task.id === taskId ? { ...task, done: !task.done } : task
-  );
+  let toggledToDone = false;
+  data.tasks = data.tasks.map((task) => {
+    if (task.id !== taskId) return task;
+    const done = !task.done;
+    toggledToDone = done;
+    return { ...task, done };
+  });
   saveDataAndSync();
   renderAll();
   if (selectedDate) renderModalTasks();
+  if (toggledToDone && window.confetti) {
+    window.confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 } });
+  }
 };
 
 const addTask = ({ title, date, classId, notes = "", done = false }) => {
@@ -521,6 +575,13 @@ cloudForm.addEventListener("submit", (event) => {
 
 syncNowBtn.addEventListener("click", () => syncWithCloud(true));
 
+themeToggle.addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  localStorage.setItem("checklist-theme", next);
+  applyTheme(next);
+});
+
 const initCloud = () => {
   const endpoint = getCloudEndpoint();
   if (endpoint) {
@@ -533,3 +594,4 @@ const initCloud = () => {
 
 renderAll();
 initCloud();
+applyTheme(localStorage.getItem("checklist-theme") || "light");
