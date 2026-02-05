@@ -522,13 +522,13 @@ button:hover:not(:disabled) {
   justify-content: space-between;
   gap: 0.25rem;
   max-width: 100%;
-  overflow: visible;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   position: relative;
 }
 
 .task-pill-title {
-  flex: 1;
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
