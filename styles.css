@@ -166,6 +166,26 @@ textarea {
   transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
+input[type="color"] {
+  padding: 0.2rem;
+  width: 56px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
 textarea {
   min-height: 80px;
   resize: vertical;
@@ -707,6 +727,15 @@ button:hover:not(:disabled) {
 [data-theme="dark"] .task-pill.overdue {
   background: rgba(248, 113, 113, 0.35);
   color: #fecaca;
+}
+
+[data-theme="dark"] input[type="color"] {
+  background: rgba(30, 41, 59, 0.7);
+  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.45);
+}
+
+[data-theme="dark"] input[type="color"]::-webkit-color-swatch {
+  border-color: rgba(148, 163, 184, 0.5);
 }
 
 [data-theme="dark"] .heatmap-cell {
