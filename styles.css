@@ -257,10 +257,14 @@ button:hover:not(:disabled) {
 
 .checkbox {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   font-size: 0.9rem;
   color: var(--muted);
+}
+
+.checkbox input {
+  margin-top: 0.15rem;
 }
 
 .overview-grid {
