@@ -35,6 +35,7 @@ const todayTasksEl = document.getElementById("todayTasks");
 const progressFill = document.getElementById("progressFill");
 const progressLabel = document.getElementById("progressLabel");
 const upcomingList = document.getElementById("upcomingList");
+const calendarUpcomingList = document.getElementById("calendarUpcomingList");
 const cloudForm = document.getElementById("cloudForm");
 const cloudEndpointInput = document.getElementById("cloudEndpoint");
 const syncNowBtn = document.getElementById("syncNow");
@@ -277,9 +278,19 @@ const renderCalendar = () => {
       pill.dataset.taskId = task.id;
       const classInfo = data.classes.find((item) => item.id === task.classId);
       pill.style.background = classInfo ? `${classInfo.color}22` : "var(--accent)";
-      pill.innerHTML = `<span>${task.title}</span>`;
+      pill.innerHTML = `
+        <span class="task-pill-title">${task.title}</span>
+        <button type="button" class="task-clear" aria-label="Clear task">✕</button>
+      `;
       pill.addEventListener("dragstart", (event) => {
         event.dataTransfer.setData("text/plain", task.id);
+      });
+      pill.querySelector(".task-clear").addEventListener("click", (event) => {
+        event.stopPropagation();
+        deleteTaskById(task.id);
+        saveDataAndSync();
+        renderAll();
+        if (selectedDate) renderModalTasks();
       });
       dayEl.appendChild(pill);
     });
@@ -346,6 +357,49 @@ const renderOverview = () => {
       <small>${task.date}${classInfo ? ` • ${classInfo.name}` : ""}</small>
     `;
     upcomingList.appendChild(item);
+  });
+};
+
+const renderCalendarUpcoming = () => {
+  const query = searchInput.value.trim();
+  const upcoming = data.tasks
+    .filter((task) => !task.done)
+    .filter((task) => matchesQuery(task, query))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 8);
+
+  calendarUpcomingList.innerHTML = "";
+  if (upcoming.length === 0) {
+    const empty = document.createElement("li");
+    empty.innerHTML = "<small>No upcoming tasks yet.</small>";
+    calendarUpcomingList.appendChild(empty);
+    return;
+  }
+
+  upcoming.forEach((task) => {
+    const item = document.createElement("li");
+    item.className = "upcoming-task";
+    const classInfo = data.classes.find((entry) => entry.id === task.classId);
+    item.innerHTML = `
+      <label class="checkbox upcoming-check">
+        <input type="checkbox" />
+      </label>
+      <div class="upcoming-meta">
+        <span>${task.title}</span>
+        <small>${task.date}${classInfo ? ` • ${classInfo.name}` : ""}</small>
+      </div>
+      <button type="button" class="task-clear-button" aria-label="Clear task">Clear</button>
+    `;
+    item.querySelector("input").addEventListener("change", (event) => {
+      setTaskDone(task.id, event.target.checked);
+    });
+    item.querySelector(".task-clear-button").addEventListener("click", () => {
+      deleteTaskById(task.id);
+      saveDataAndSync();
+      renderAll();
+      if (selectedDate) renderModalTasks();
+    });
+    calendarUpcomingList.appendChild(item);
   });
 };
 
@@ -436,6 +490,21 @@ const toggleTask = (taskId) => {
   }
 };
 
+const setTaskDone = (taskId, done) => {
+  let toggledToDone = false;
+  data.tasks = data.tasks.map((task) => {
+    if (task.id !== taskId) return task;
+    toggledToDone = !task.done && done;
+    return { ...task, done };
+  });
+  saveDataAndSync();
+  renderAll();
+  if (selectedDate) renderModalTasks();
+  if (toggledToDone && window.confetti) {
+    window.confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 } });
+  }
+};
+
 const addTask = ({ title, date, classId, notes = "", done = false }) => {
   data.tasks.push({
     id: crypto.randomUUID(),
@@ -460,6 +529,7 @@ const deleteTaskById = (taskId) => {
 const renderAll = () => {
   renderClasses();
   renderOverview();
+  renderCalendarUpcoming();
   renderCalendar();
 };
 
@@ -493,6 +563,7 @@ quickAddForm.addEventListener("submit", (event) => {
 
 const rerenderAll = () => {
   renderOverview();
+  renderCalendarUpcoming();
   renderCalendar();
   if (selectedDate) renderModalTasks();
 };

@@ -103,6 +103,12 @@ h2 {
   padding: var(--space-5);
 }
 
+.calendar-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -387,6 +393,59 @@ button:hover:not(:disabled) {
   backdrop-filter: blur(16px);
 }
 
+.calendar-upcoming-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: var(--space-2);
+}
+
+.upcoming-list--detailed {
+  gap: var(--space-2);
+}
+
+.upcoming-list--detailed li {
+  align-items: flex-start;
+  position: relative;
+}
+
+.upcoming-task {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.upcoming-check {
+  margin-top: 0.2rem;
+}
+
+.upcoming-meta span {
+  display: block;
+  font-weight: 600;
+}
+
+.upcoming-meta small {
+  color: var(--muted);
+}
+
+.task-clear-button {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.upcoming-task:hover .task-clear-button,
+.task-pill:hover .task-clear {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .calendar-header {
   display: flex;
   align-items: center;
@@ -454,7 +513,7 @@ button:hover:not(:disabled) {
 
 .task-pill {
   font-size: 0.75rem;
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 1.6rem 0.2rem 0.5rem;
   border-radius: 999px;
   background: rgba(99, 102, 241, 0.2);
   color: var(--text);
@@ -466,6 +525,36 @@ button:hover:not(:disabled) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  position: relative;
+}
+
+.task-pill-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-clear {
+  position: absolute;
+  right: 0.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.15);
+  color: inherit;
+  font-size: 0.7rem;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.task-clear:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--danger);
 }
 
 .task-pill.done {

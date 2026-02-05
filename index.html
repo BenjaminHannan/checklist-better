@@ -105,18 +105,28 @@
         </section>
       </aside>
 
-      <section class="calendar">
-        <div class="calendar-header">
-          <button id="prevMonth" aria-label="Previous month">◀</button>
-          <h2 id="monthLabel"></h2>
-          <button id="nextMonth" aria-label="Next month">▶</button>
-          <button id="todayBtn" class="ghost">Today</button>
-        </div>
-        <div class="weekdays">
-          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-        </div>
-        <div id="calendarGrid" class="calendar-grid"></div>
-      </section>
+      <div class="calendar-column">
+        <section class="calendar">
+          <div class="calendar-header">
+            <button id="prevMonth" aria-label="Previous month">◀</button>
+            <h2 id="monthLabel"></h2>
+            <button id="nextMonth" aria-label="Next month">▶</button>
+            <button id="todayBtn" class="ghost">Today</button>
+          </div>
+          <div class="weekdays">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </section>
+
+        <section class="panel calendar-upcoming">
+          <div class="calendar-upcoming-header">
+            <h2>Upcoming</h2>
+            <p class="subtitle">Next tasks with classes and quick checkoffs.</p>
+          </div>
+          <ul id="calendarUpcomingList" class="upcoming-list upcoming-list--detailed"></ul>
+        </section>
+      </div>
     </main>
 
     <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
