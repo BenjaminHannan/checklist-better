@@ -36,6 +36,7 @@ const progressFill = document.getElementById("progressFill");
 const progressLabel = document.getElementById("progressLabel");
 const upcomingList = document.getElementById("upcomingList");
 const calendarUpcomingList = document.getElementById("calendarUpcomingList");
+const heatmapGrid = document.getElementById("heatmapGrid");
 const cloudForm = document.getElementById("cloudForm");
 const cloudEndpointInput = document.getElementById("cloudEndpoint");
 const syncNowBtn = document.getElementById("syncNow");
@@ -360,6 +361,29 @@ const renderOverview = () => {
   });
 };
 
+const renderHeatmap = () => {
+  heatmapGrid.innerHTML = "";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (let offset = 29; offset >= 0; offset -= 1) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - offset);
+    const dateKey = formatDateKey(date);
+    const tasks = data.tasks.filter((task) => task.date === dateKey);
+    const completed = tasks.filter((task) => task.done);
+    let status = "none";
+    if (tasks.length > 0 && completed.length === tasks.length) {
+      status = "all";
+    } else if (completed.length > 0) {
+      status = "some";
+    }
+    const cell = document.createElement("div");
+    cell.className = `heatmap-cell heatmap-${status}`;
+    cell.title = `${dateKey} • ${completed.length}/${tasks.length} done`;
+    heatmapGrid.appendChild(cell);
+  }
+};
+
 const renderCalendarUpcoming = () => {
   const query = searchInput.value.trim();
   const upcoming = data.tasks
@@ -529,6 +553,7 @@ const deleteTaskById = (taskId) => {
 const renderAll = () => {
   renderClasses();
   renderOverview();
+  renderHeatmap();
   renderCalendarUpcoming();
   renderCalendar();
 };
@@ -563,6 +588,7 @@ quickAddForm.addEventListener("submit", (event) => {
 
 const rerenderAll = () => {
   renderOverview();
+  renderHeatmap();
   renderCalendarUpcoming();
   renderCalendar();
   if (selectedDate) renderModalTasks();
