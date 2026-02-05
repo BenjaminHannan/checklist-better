@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Checklist Calendar</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Checklist Calendar</h1>
+        <p class="subtitle">Plan your classes, tasks, and assignments by day.</p>
+      </div>
+      <div class="header-actions">
+        <span class="subtitle badge">Autosync enabled</span>
+        <button id="themeToggle" class="ghost" type="button" aria-label="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>Overview</h2>
+          <div class="overview-grid">
+            <div class="overview-card">
+              <span>Total tasks</span>
+              <strong id="totalTasks">0</strong>
+            </div>
+            <div class="overview-card">
+              <span>Streak</span>
+              <strong id="streakCount">🔥 0 Day Streak</strong>
+            </div>
+            <div class="overview-card">
+              <span>Completed</span>
+              <strong id="completedTasks">0</strong>
+            </div>
+            <div class="overview-card">
+              <span>Due today</span>
+              <strong id="todayTasks">0</strong>
+            </div>
+          </div>
+          <div class="overview-footer">
+            <span>30-day heatmap</span>
+          </div>
+          <div id="heatmapGrid" class="heatmap-grid" aria-label="30-day task heatmap"></div>
+          <div class="progress-track" aria-label="Completion progress">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+          <p id="progressLabel" class="progress-label">0% complete</p>
+          <div class="overview-footer">
+            <span>Next up</span>
+          </div>
+          <ul id="upcomingList" class="upcoming-list"></ul>
+        </section>
+
+        <section class="panel">
+          <h2>Classes</h2>
+          <div id="classList" class="class-list"></div>
+          <form id="classForm" class="stack">
+            <input id="className" type="text" placeholder="Add class name" required />
+            <div class="row">
+              <input id="classColor" type="color" value="#4f46e5" />
+              <button type="submit">Add Class</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Quick Add</h2>
+          <form id="quickAddForm" class="stack">
+            <input id="quickTitle" type="text" placeholder="Task title" required />
+            <input id="quickDate" type="date" required />
+            <select id="quickClass"></select>
+            <button type="submit">Add Task</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Filters</h2>
+          <input id="taskSearch" type="search" placeholder="Search tasks or notes" />
+          <select id="filterClass"></select>
+          <label class="checkbox">
+            <input id="upcomingOnly" type="checkbox" />
+            Show next 7 days only
+          </label>
+          <label class="checkbox">
+            <input id="hideCompleted" type="checkbox" />
+            Hide completed
+          </label>
+        </section>
+
+        <section class="panel">
+          <h2>Cloud Sync</h2>
+          <p class="subtitle">Connect a free Google Sheet so updates sync anywhere.</p>
+          <form id="cloudForm" class="stack">
+            <input
+              id="cloudEndpoint"
+              type="url"
+              placeholder="Apps Script web app URL"
+              required
+            />
+            <div class="row">
+              <button type="submit">Connect</button>
+              <button id="syncNow" type="button" class="ghost">Sync now</button>
+            </div>
+          </form>
+          <p id="syncStatus" class="sync-status">Not connected</p>
+        </section>
+      </aside>
+
+      <div class="calendar-column">
+        <section class="calendar">
+          <div class="calendar-header">
+            <button id="prevMonth" aria-label="Previous month">◀</button>
+            <h2 id="monthLabel"></h2>
+            <button id="nextMonth" aria-label="Next month">▶</button>
+            <button id="todayBtn" class="ghost">Today</button>
+          </div>
+          <div class="weekdays">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </section>
+
+        <section class="panel calendar-upcoming">
+          <div class="calendar-upcoming-header">
+            <h2>Upcoming</h2>
+            <p class="subtitle">Next tasks with classes and quick checkoffs.</p>
+          </div>
+          <ul id="calendarUpcomingList" class="upcoming-list upcoming-list--detailed"></ul>
+        </section>
+      </div>
+    </main>
+
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Tasks</h3>
+          <button id="closeModal" aria-label="Close">✕</button>
+        </div>
+        <div id="modalBody"></div>
+        <form id="taskForm" class="stack">
+          <input id="taskTitle" type="text" placeholder="Task title" required />
+          <textarea id="taskNotes" placeholder="Notes"></textarea>
+          <select id="taskClass"></select>
+          <label class="checkbox">
+            <input id="taskDone" type="checkbox" />
+            Mark as completed
+          </label>
+          <div class="row">
+            <button type="submit">Save Task</button>
+            <button type="button" id="deleteTask" class="danger hidden">Delete</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
